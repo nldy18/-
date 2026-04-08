@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间清单</title>
+    <link rel="stylesheet" href="css/style.css?v=1765685100">
+    <link rel="stylesheet" href="css/fab.css?v=1765685091">
+    <link rel="stylesheet" href="css/style-table-menu.css?v=1765685091">
+    <link rel="stylesheet" href="css/category.css?v=1765685091">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#f5f5f5">
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/maskable.svg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <style>
+        /* 强制覆盖样式：解决缓存顽固问题 */
+        
+        /* 1. 分类标签优化 */
+        .task-cat-pill {
+            font-size: 10px !important;
+            height: 20px !important;
+            border-radius: 99px !important;
+            background-color: rgba(0,0,0,0.06) !important;
+            border: none !important;
+            padding: 0 8px !important;
+            color: #888 !important;
+            font-weight: 500 !important;
+        }
+
+        /* 2. 时间信息去粗 */
+        .task-grid-meta {
+            font-weight: 400 !important;
+            color: #444 !important;
+        }
+
+        /* 3. 序号弱化 */
+        .task-grid-row .task-index {
+            font-weight: 400 !important;
+            color: #aaa !important;
+            font-size: 14px !important;
+        }
+        /* 关键：Grid 行使用 stretch，让所有列撑满行高 */
+        .task-grid-row {
+            align-items: stretch !important;
+        }
+        /* 每列内部使用 Flex 垂直居中 */
+        .task-grid-index,
+        .task-grid-task,
+        .task-grid-meta,
+        .task-grid-ops {
+            display: flex !important;
+            align-items: center !important;
+        }
+        .task-grid-index {
+            justify-content: center !important;
+        }
+
+        /* 添加任务成功提示 */
+        .add-task-toast {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px 16px;
+            font-size: 14px;
+            text-align: center;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+        }
+        .add-task-toast.show {
+            max-height: 50px;
+            opacity: 1;
+            padding: 10px 16px;
+        }
+        .add-task-toast.fade-out {
+            opacity: 0;
+            justify-content: center !important;
+        }
+        
+        /* 4. 占位符去粗 */
+        .task-grid-meta:empty::before,
+        .task-grid-meta:contains('—') {
+            font-weight: 400 !important;
+            color: #ccc !important;
+        }
+
+        /* 5. 空状态占位图 */
+        .task-empty-placeholder {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            padding: 40px 0 !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
+        }
+        .task-empty-placeholder svg {
+            display: block !important;
+            margin: 0 auto !important;
+        }
+        /* 确保父容器也居中 */
+        .task-cards-empty,
+        #taskCards:has(.task-empty-placeholder) {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+        }
+        
+        /* 移动端：logo左、用户名右、日期换行 */
+        @media (max-width: 768px) {
+            .page-tasks .header-top {
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+            .page-tasks .app-brand {
+                order: 1 !important;
+                flex-shrink: 0 !important;
+            }
+            .page-tasks .user-dropdown-container {
+                order: 2 !important;
+                flex-shrink: 0 !important;
+                margin-left: auto !important;
+            }
+            .page-tasks .date-bar {
+                order: 3 !important;
+                flex-basis: 100% !important;
+                width: 100% !important;
+                margin-top: 4px !important;
+                display: flex !important;
+                justify-content: center !important;
+            }
+        }
+    </style>
+</head>
+<body class="page-tasks">
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div class="app-brand">
+                    <img src="icons/logo.svg" alt="Logo" class="app-logo">
+                    <h1 class="app-title">时间清单</h1>
+                </div>
+                
+                <div class="date-bar">
+                    <button id="currentDateBtn" class="date-title" type="button" aria-label="打开日历"></button>
+                </div>
+
+                <div class="user-dropdown-container" id="userDropdown">
+                    <button class="user-dropdown-trigger" id="userDropdownTrigger">
+                        <span id="userNickname">...</span>
+                        <span class="arrow-down">▼</span>
+                    </button>
+                    <div class="user-dropdown-menu">
+                        <div class="user-menu-item" id="menuEditProfile">修改昵称</div>
+                        <div class="user-menu-item" id="menuChangePwd">修改密码</div>
+                        <div class="user-menu-item" id="menuInstall">安装应用</div>
+                        <div class="user-menu-item danger" id="menuLogout">退出登录</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="task-table-container">
+                <table id="taskTable" class="task-table">
+                    <thead>
+                        <tr>
+                            <th aria-label="序号"></th>
+                            <th>任务</th>
+                            <th>计划时间</th>
+                            <th>实际时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <!-- 移动端卡片列表（移动端显示，桌面端隐藏） -->
+            <div id="taskCards" class="task-cards" aria-label="任务卡片列表"></div>
+            <div id="summary" class="summary">
+                <h3>时间记录</h3>
+                <p id="summaryText">工作0分钟、事业0分钟、陪家人0分钟、其它0分钟;总共0分钟</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 浮动操作按钮 -->
+    <div class="fab-container" aria-label="快捷操作">
+        <button id="fabToggle" class="fab-btn" type="button" aria-expanded="false" aria-controls="fabMenu">＋</button>
+        <div id="fabMenu" class="fab-menu" hidden>
+            <button id="addTaskBtn" class="fab-item" type="button">添加任务</button>
+            <button id="saveTemplateBtn" class="fab-item" type="button">保存为模板</button>
+            <button id="useTemplateBtn" class="fab-item" type="button">使用模板</button>
+        </div>
+    </div>
+    
+    <!-- 添加任务模态框 -->
+    <div id="addTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加任务</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- 添加成功提示 -->
+                <div id="addTaskToast" style="position:absolute;left:0;right:0;top:0;background-color:#e3f2fd;color:#1565c0;padding:12px 16px;font-size:14px;text-align:center;z-index:10;transform:translateY(-100%);opacity:0;transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s ease;">任务已添加</div>
+                <form id="addTaskForm">
+                    <div class="form-group">
+                        <label for="taskCategory">分类:</label>
+                        <select id="taskCategory" required>
+                            <option value="每日任务">每日任务</option>
+                            <option value="工作">工作</option>
+                            <option value="事业">事业</option>
+                            <option value="陪家人">陪家人</option>
+                            <option value="其它">其它</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskName">任务:</label>
+                        <input type="text" id="taskName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="plannedStartTime">计划开始时间:</label>
+                        <input type="time" id="plannedStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="plannedEndTime">计划结束时间:</label>
+                        <input type="time" id="plannedEndTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>计划时长:</label>
+                        <input type="text" id="plannedDurationDisplay" readonly style="background-color: #f5f5f5;">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">保存</button>
+                        <button type="button" class="btn-secondary" id="cancelAddTask">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑实际时间模态框 -->
+    <div id="editTimeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>记录实际时间</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editTimeForm">
+                    <div class="form-group">
+                        <label for="actualStartTime">实际开始时间:</label>
+                        <input type="time" id="actualStartTime">
+                    </div>
+                    <div class="form-group">
+                        <label for="actualEndTime">实际结束时间:</label>
+                        <input type="time" id="actualEndTime">
+                    </div>
+                    <div class="form-group">
+                        <label>实际时长:</label>
+                        <input type="text" id="actualDurationDisplay" readonly style="background-color: #f5f5f5;">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">保存</button>
+                        <button type="button" class="btn-secondary" id="cancelEditTime">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑任务模态框 -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>编辑任务</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editTaskForm">
+                    <div class="form-group">
+                        <label for="editTaskCategory">分类:</label>
+                        <select id="editTaskCategory" required>
+                            <option value="每日任务">每日任务</option>
+                            <option value="工作">工作</option>
+                            <option value="事业">事业</option>
+                            <option value="陪家人">陪家人</option>
+                            <option value="其它">其它</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskName">任务:</label>
+                        <input type="text" id="editTaskName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPlannedStartTime">计划开始时间:</label>
+                        <input type="time" id="editPlannedStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPlannedEndTime">计划结束时间:</label>
+                        <input type="time" id="editPlannedEndTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPlannedDurationMinutes">计划时长(分钟):</label>
+                        <input type="number" id="editPlannedDurationMinutes" min="0" step="1" inputmode="numeric" style="background-color: #fff;">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">保存</button>
+                        <button type="button" class="btn-secondary" id="cancelEditTask">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模板选择模态框 -->
+    <div id="templateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>选择模板</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="templateList" class="template-list">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改昵称模态框 -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>修改昵称</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom:15px">
+                    <label>新昵称</label>
+                    <input type="text" id="newNicknameInput" class="modal-input" placeholder="输入新昵称" maxlength="12" style="width:100%;padding:10px;margin-top:5px;border:1px solid #ddd;border-radius:6px">
+                </div>
+                <div style="text-align:right">
+                    <button class="btn-primary" id="confirmEditProfileBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码模态框 -->
+    <div id="changePwdModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>修改密码</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom:15px">
+                    <label>新密码 (需包含数字和字母，至少6位)</label>
+                    <input type="password" id="newPassword" class="modal-input" placeholder="输入新密码" style="width:100%;padding:10px;margin-top:5px;border:1px solid #ddd;border-radius:6px">
+                </div>
+                <div style="text-align:right">
+                    <button class="btn-primary" id="confirmChangePwdBtn">确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分类管理模态框（与 index.html 保持一致，确保"管理分类"入口在本页也可用） -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>管理分类</h2>
+                <span class="close" onclick="document.getElementById('categoryModal').classList.remove('show')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="category-add-row">
+                    <input type="text" id="newCategoryInput" placeholder="新分类名称 (最多6字)" maxlength="6">
+                    <button class="btn-primary btn-small" onclick="Category.submitAdd()">添加</button>
+                </div>
+                <div id="categoryList" class="category-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js" defer></script>
+    <script src="js/storage.js" defer></script>
+    <script src="js/template.js" defer></script>
+    <script src="js/category.js?v=1765685089" defer></script>
+    <script src="js/taskList.js?v=1765685100" defer></script>
+    <script src="js/pwa.js?t=1765685089" defer></script>
+    <script>
+        // 显示用户信息
+        document.addEventListener('DOMContentLoaded', () => {
+            const userInfo = Auth.getUserInfo();
+            if (userInfo) {
+                const nicknameEl = document.getElementById('userNickname');
+                if (nicknameEl) {
+                    nicknameEl.textContent = userInfo.nickname || '用户';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

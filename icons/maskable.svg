@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- maskable: 预留安全区（四周留白），避免被裁切 -->
+  <rect width="512" height="512" fill="#4CAF50"/>
+  <rect x="96" y="96" width="320" height="320" rx="96" fill="#ffffff" opacity="0.96"/>
+  <rect x="152" y="168" width="208" height="26" rx="13" fill="#dfe7df"/>
+  <rect x="152" y="222" width="168" height="26" rx="13" fill="#dfe7df"/>
+  <rect x="152" y="276" width="128" height="26" rx="13" fill="#dfe7df"/>
+  <path d="M206 266l34 34 74-88" fill="none" stroke="#4CAF50" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

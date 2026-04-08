@@ -1,0 +1,100 @@
+
+/* 分类管理样式 */
+.category-add-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.category-add-row input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    outline: none;
+}
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg);
+    border-radius: var(--r-sm);
+    transition: background 0.2s;
+}
+
+.category-item:hover {
+    background: #eee;
+}
+
+.category-name {
+    font-size: 14px;
+    color: var(--text);
+}
+
+.category-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    opacity: 1; /* 始终可见，避免“看不见按钮”问题 */
+    transition: background 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}
+
+.text-danger { color: var(--danger); }
+.text-success { color: var(--primary); }
+
+.btn-icon-svg {
+    display: block;
+}
+
+.category-edit-input {
+    width: 120px;
+    padding: 4px;
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.category-migration {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.migrate-select {
+    flex: 1;
+    padding: 4px;
+    border: 1px solid var(--danger);
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.text-small { font-size: 12px; }
+

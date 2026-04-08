@@ -1,0 +1,1065 @@
+/* 任务表格样式 - flomo 风格 */
+.task-table-container {
+    /* 卡片化列表：行间留白透出背景色，所以容器本身不做“卡片” */
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    border: none;
+    overflow: visible; /* 允许操作菜单浮层溢出显示（不被容器边框/圆角遮住） */
+    margin-bottom: 20px;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
+
+.page-tasks .task-table-container {
+    display: none; /* 统一使用卡片列表渲染，表格结构仅保留以兼容历史代码 */
+}
+
+.task-cards {
+    display: block; /* 桌面端也使用卡片/网格列表 */
+}
+
+/* 空状态时居中显示 */
+.task-cards:has(.task-empty-placeholder) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.task-empty-placeholder {
+    width: 100%;
+    padding: 34px 18px;
+    border-radius: var(--r-lg);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.015); /* 更接近“淡灰占位” */
+    border: 1px dashed rgba(0, 0, 0, 0.06);
+    box-shadow: none;
+}
+
+.task-empty-placeholder svg {
+    display: block;
+    max-width: 320px;
+    width: 100%;
+    height: auto;
+}
+
+@media (max-width: 480px) {
+    .task-empty-placeholder {
+        padding: 28px 14px;
+    }
+    .task-empty-placeholder svg {
+        max-width: 300px;
+    }
+}
+
+.task-cards-empty {
+    background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 18px 14px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.task-card {
+    background: transparent; /* 卡片可视层交给 swipe-layer，保证“整张卡片一起滑” */
+    border: none;
+    border-radius: var(--r-lg);
+    box-shadow: none;
+    padding: 0;
+    position: relative;
+    overflow: hidden; /* 支持滑动露出按钮 */
+}
+
+/* 移动端滑动：仅提供视觉提示，真实操作仍由既有按钮完成（稳） */
+.task-card::before,
+.task-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 86px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 13px;
+    color: #fff;
+    z-index: 0;
+    pointer-events: none;
+}
+.task-card::before { left: 0; background: #1777b3; }
+.task-card::after { right: 0; background: #6b7280; }
+
+.task-card + .task-card {
+    margin-top: 12px;
+}
+
+.task-card__swipe-layer {
+    background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 14px 14px 12px;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.task-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.task-card__check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-card__category {
+    font-size: 12px;
+    color: var(--muted);
+    background: rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.task-card__name {
+    font-size: 17px;
+    font-weight: 650;
+    color: var(--text);
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+
+.task-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+    justify-content: flex-start;
+}
+
+.task-card__meta-text {
+    font-size: 13px;
+    color: #444;
+    font-weight: 600;
+}
+
+.task-card__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.task-card--completed {
+    /* 完成态：统一置灰（背景 + 描边 + 防止菜单被遮挡） */
+    background: rgba(0, 0, 0, 0.06); /* 恢复为纯灰底（非渐变） */
+    border-color: rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 2;
+}
+
+/* 修复：当前卡片可视层在 .task-card__swipe-layer 上，完成态背景需要作用到该层 */
+.task-card--completed .task-card__swipe-layer {
+    background: rgba(0, 0, 0, 0.06); /* 恢复为纯灰底（非渐变） */
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* 完成态（移动端卡片）：整体置灰（避免遗漏） */
+.task-card--completed .task-card__name {
+    color: #8f8f8f;
+}
+.task-card--completed .task-card__category {
+    color: #9a9a9a;
+}
+.task-card--completed .task-card__meta-text {
+    color: #9a9a9a;
+}
+/* 计划/实际时间：保持纯文字，不要背景块 */
+.task-card--completed .task-time-pill {
+    color: #9a9a9a;
+    background: transparent;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    /* 移动端沿用原卡片样式 */
+    .task-card + .task-card {
+        margin-top: 10px;
+    }
+    /* 触屏更好点：checkbox 更大 */
+    .task-table input[type="checkbox"],
+    .task-cards input[type="checkbox"] {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* 卡片内的“···”更容易点到 */
+    .task-card__actions .task-menu-btn {
+        padding: 8px 12px;
+        border-radius: 10px;
+    }
+}
+
+/* 桌面端：隐藏 table，使用 grid 卡片（避免 table 卡片化导致的“分裂/错乱”） */
+.task-table-container {
+    display: none;
+}
+
+/* --- 桌面网格：统一列宽/间距（header 与 row 必须完全一致，避免错位） --- */
+:root {
+    /* 5列：序号 / 任务 / 计划 / 实际 / 操作
+       - 任务列不再过宽，避免「任务→计划时间」间出现大块空白
+       - 时间列使用半固定宽度（既紧凑又不易挤爆）
+       - 操作列固定宽度，保证 header 与按钮组对齐 */
+    /* 任务列/时间列都设置上限：让“计划时间”更贴近任务，不被大屏空白拉得很开 */
+    --task-grid-cols: 56px minmax(200px, 300px) minmax(160px, 190px) minmax(160px, 190px) 96px;
+    --task-grid-gap: 10px;
+}
+
+@media (max-width: 980px) {
+    :root {
+        --task-grid-cols: 52px minmax(160px, 260px) minmax(140px, 170px) minmax(140px, 170px) 92px;
+        --task-grid-gap: 8px;
+    }
+}
+
+/* 桌面卡片头部（5列） */
+.task-grid-header {
+    display: grid;
+    grid-template-columns: var(--task-grid-cols);
+    column-gap: var(--task-grid-gap);
+    padding: 10px 14px; /* 与 row 统一，视觉更整齐 */
+    color: var(--muted-2);
+    font-weight: 500;
+    background: rgba(255,255,255,0.65);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    align-items: center; /* 垂直居中 */
+    justify-content: start; /* 关键：避免大屏时把列“拉伸”导致任务列空白变大 */
+}
+
+/* header 单元格：默认左对齐；“操作”右对齐以匹配按钮组 */
+.task-grid-hcell {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.task-grid-header .task-grid-hcell:last-child {
+    justify-self: end;
+    text-align: right;
+    padding-right: 4px;
+}
+
+/* 桌面卡片行 */
+.task-grid-row {
+    display: grid;
+    /* 必须与 header 保持完全一致 */
+    grid-template-columns: var(--task-grid-cols);
+    column-gap: var(--task-grid-gap);
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    justify-content: start;
+    /* 关键修复：使用 stretch 让所有列撑满行高，然后各列内部自己垂直居中 */
+    align-items: stretch;
+}
+
+/* 确保操作列内容不被切 */
+.task-grid-ops {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-right: 4px; /* 稍微留点余地 */
+    min-width: 0; /* 防止 flex item 溢出 */
+    align-self: center; /* 与 header“操作”更一致，避免 stretch 造成视觉偏移 */
+}
+
+/* 强制复选框和按钮可见 */
+.task-ops__check input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    opacity: 1;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.task-card__actions .task-menu-btn,
+.task-grid-ops .task-menu-btn {
+    opacity: 1;
+    visibility: visible;
+    display: inline-flex;
+}
+
+/* 取消之前的 padding-top hack（它会把时间列"顶下来"，看起来不垂直居中） */
+.task-grid-row .task-grid-meta {
+    padding-top: 0;
+    font-variant-numeric: tabular-nums; /* 数字等宽对齐 */
+}
+
+.task-grid-row + .task-grid-row {
+    margin-top: 12px; /* 卡片之间留白 */
+}
+
+.task-grid-row.is-completed {
+    /* 完成态：统一置灰（背景 + 描边） */
+    background: linear-gradient(90deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.02) 100%);
+    border-color: rgba(0,0,0,0.06);
+    /* 避免使用 opacity（会创建 stacking context，导致菜单可能被其它行盖住） */
+    position: relative;
+    z-index: 2;
+}
+
+/* 菜单打开时：把所在行/卡片临时提升到最顶层，彻底避免“被下一行压住” */
+.task-grid-row.menu-open,
+.task-card.menu-open {
+    z-index: 9999 !important;
+}
+
+/* 完成态：任务标题更明显（任务列保持左对齐不变） */
+.task-grid-row.is-completed .task-title {
+    color: #7a7a7a;
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    text-decoration-color: rgba(0,0,0,0.25);
+}
+
+/* 完成态（桌面网格）：计划/实际时间、分类、序号统一置灰 */
+.task-grid-row.is-completed .task-grid-meta,
+.task-grid-row.is-completed .task-cat-tab,
+.task-grid-row.is-completed .task-index {
+    color: #9a9a9a;
+}
+
+.task-grid-index {
+    display: flex;
+    align-items: center;         /* 内部内容垂直居中 */
+    justify-content: center;     /* 内部内容水平居中 */
+}
+
+.task-grid-task {
+    min-width: 0;
+    display: flex;
+    align-items: center;         /* 内部内容垂直居中 */
+}
+
+.task-title {
+    font-size: 18px;
+    font-weight: 750;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.task-grid-meta {
+    font-size: 15px;
+    font-weight: 400;
+    color: #222;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    display: flex;
+    align-items: center;         /* 内部内容垂直居中 */
+    line-height: 1.2;
+}
+
+.task-grid-ops {
+    display: flex;
+    align-items: center;         /* 内部内容垂直居中 */
+    justify-content: flex-end;
+    gap: 8px;
+    padding-right: 4px;
+    min-width: 0;
+}
+/* 修复：这里原来多了一个孤立的 '}'，会导致后续 CSS 解析异常 */
+
+/* 序号弱化 */
+.task-grid-row .task-index {
+    font-size: 14px;
+    font-weight: 400; /* 去掉粗体 */
+    color: #999; /* 变淡 */
+    line-height: 1;
+}
+
+/* 分类页签：已废弃，隐藏 */
+.task-cat-tab {
+    display: none;
+}
+
+/* --- 新的分类胶囊标签样式 --- */
+.task-cat-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 20px; /* 稍微压扁一点 */
+    padding: 0 8px;
+    margin-right: 8px;
+    border-radius: 99px; /* 完全圆角 */
+    background-color: rgba(0, 0, 0, 0.05); /* 极淡背景 */
+    color: #888; /* 弱化文字颜色 */
+    font-size: 10px; /* 变小 */
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0; /* 防止被挤压 */
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+/* --- 修改任务标题容器为 Flex 布局 --- */
+.task-title {
+    /* 覆盖旧样式，改为容器 */
+    display: flex !important;
+    align-items: center;
+    min-width: 0; /* 允许子元素触发省略号 */
+    font-size: 18px; /* 保持原字号 */
+    font-weight: 750;
+    color: #222;
+    /* 移除旧的 ellipsis 属性，移交给子元素 */
+    white-space: normal !important; 
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+
+/* --- 真正的任务文本样式 --- */
+.task-title-text {
+    font-weight: 750;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- 适配完成态样式 --- */
+/* 覆盖旧的完成态标题样式 */
+.task-grid-row.is-completed .task-title {
+    color: inherit;
+    text-decoration: none !important;
+}
+
+/* 修改原来的完成态选择器 */
+.task-grid-row.is-completed .task-title-text {
+    color: #999;
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    text-decoration-color: rgba(0,0,0,0.15);
+}
+
+/* 完成态时，标签也进一步弱化 */
+.task-grid-row.is-completed .task-cat-pill {
+    background-color: rgba(0, 0, 0, 0.02);
+    color: #ccc;
+    border-color: transparent;
+}
+
+/* 让 “···” 更贴近右侧但不贴边 */
+.task-grid-row .task-menu-btn {
+    padding: 4px 6px;
+}
+.task-table {
+    width: 100%;
+    /* 卡片行效果：用 border-spacing 做行间距 */
+    border-collapse: separate;
+    border-spacing: 0 12px;
+    font-size: 14px;
+    min-width: 0;
+    table-layout: auto; /* 让内容决定列宽，避免时间被过度截断 */
+    background: transparent;
+}
+
+/* 覆盖 style.css 里对 task-table 的 min-width:900px，避免桌面端横向滚动 */
+.task-table {
+    min-width: 0 !important;
+}
+
+/* 5列布局：序号/任务/计划时间/实际时间/操作 */
+.task-table th:nth-child(1),
+.task-table td:nth-child(1) { width: 96px; }
+.task-table th:nth-child(2),
+.task-table td:nth-child(2) { width: 26%; }
+.task-table th:nth-child(3),
+.task-table td:nth-child(3) { width: 26%; }
+.task-table th:nth-child(4),
+.task-table td:nth-child(4) { width: 26%; }
+.task-table th:nth-child(5),
+.task-table td:nth-child(5) { width: 22%; min-width: 160px; }
+
+.task-table th {
+    background: rgba(255,255,255,0.75);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: none;
+    font-weight: 500; /* 减弱字重 */
+    color: var(--muted-2); /* 弱化颜色 */
+    font-size: 13px;
+    text-transform: none;
+    letter-spacing: 0;
+    /* 卡片行 + border-spacing 下 sticky 容易出现错位/遮挡，禁用更稳 */
+    position: static;
+    top: auto;
+    z-index: auto;
+    vertical-align: middle;
+}
+
+/* 第一列（序号）无标题，占位 */
+.task-table th:first-child {
+    color: transparent;
+}
+
+.task-table td {
+    padding: 12px 14px; /* 卡片更紧凑：一屏更多 */
+    border: 1px solid rgba(0,0,0,0.10);
+    position: relative;
+    vertical-align: middle;
+    text-align: left;
+    background: var(--surface);
+}
+
+/* 卡片圆角 + 阴影 */
+.task-table tbody tr td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+.task-table tbody tr td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+/* 把每行拼成一个完整“卡片”：去掉中间的双边框，但保留外轮廓 */
+.task-table tbody tr td + td { border-left: 0; }
+.task-table tbody tr:hover td {
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.task-table tr:last-child td {
+    border-bottom: none;
+}
+
+.task-table tr {
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    will-change: background-color;
+}
+
+/* 完成行样式 */
+.task-table tr.task-completed-row {
+    background: transparent;
+}
+
+.task-table tr.task-completed-row td {
+    opacity: 0.75;
+    color: #999;
+    /* 移除之前的 text-decoration: line-through */
+}
+
+/* 整行划线效果 */
+.task-table tr.task-completed-row::after {
+    content: none;
+}
+
+/* --- 新表格结构样式（序号/标签/合并时间/单列操作） --- */
+.task-index-cell {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.task-cat-tag {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--muted);
+    background: rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    line-height: 1.1;
+}
+.task-index {
+    display: block;
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+}
+
+.task-name--left {
+    font-size: 20px;
+    font-weight: 700;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.task-merged {
+    font-size: 18px; /* 略小一点，避免时间被截断 */
+    font-weight: 650;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.task-ops {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 18px;
+}
+.task-ops__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Checkbox 美化（表格 + 卡片通用） */
+.task-table input[type="checkbox"],
+.task-cards input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 26px;               /* 更大更精致 */
+    height: 26px;
+    border: 2px solid var(--border-strong);
+    border-radius: 50%; /* 圆形 */
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    vertical-align: middle;
+    background-color: transparent;
+    z-index: 6; /* 确保在划线之上 */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.task-table input[type="checkbox"]:hover,
+.task-cards input[type="checkbox"]:hover {
+    border-color: var(--primary);
+    background-color: rgba(23, 119, 179, 0.06);
+}
+
+.task-table input[type="checkbox"]:checked,
+.task-cards input[type="checkbox"]:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Checkbox 对号 */
+.task-table input[type="checkbox"]:checked::after,
+.task-cards input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 11px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -60%) rotate(45deg);
+}
+
+/* 任务信息突出显示 */
+.task-table .task-category-text {
+    font-weight: 500;
+    color: #666;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.task-table .task-name {
+    color: var(--text);
+    font-weight: 600; /* 加粗 */
+    font-size: 16px; /* 加大 */
+    line-height: 1.6;
+    margin: 0;
+}
+
+.task-table .task-duration {
+    color: #444;
+    font-weight: 500; /* 稍微加粗 */
+    font-size: 14px;
+}
+
+.task-table .task-time-pill {
+    color: var(--text);
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: rgba(0,0,0,0.045);
+    padding: 4px 10px; /* 稍微加宽 */
+    border-radius: 4px;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.08);
+    vertical-align: middle;
+    white-space: nowrap;
+    font-weight: 500; /* 加重字重 */
+}
+
+.task-table .task-actions {
+    position: relative;
+    z-index: 100; /* 确保操作菜单在最上层 */
+    text-align: center;
+}
+
+/* 新结构：操作列（checkbox + menu） */
+.task-table .task-ops {
+    position: relative;
+    z-index: 100;
+    text-align: left;
+}
+
+.task-actions-menu {
+    position: relative;
+    display: inline-block;
+}
+
+/* 操作菜单显示由 JS hover + fixed 定位控制 */
+
+.task-menu-btn {
+    background: rgba(0,0,0,0.06);
+    border: none;
+    color: #444;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 6px 10px; /* 加大点击区域 */
+    border-radius: 6px;
+    transition: all 0.2s;
+    vertical-align: middle;
+    display: inline-block;
+    opacity: 1; /* 强制不透明 */
+    visibility: visible;
+}
+
+.task-menu-btn:hover {
+    background: rgba(0,0,0,0.12);
+    color: #000;
+}
+
+.task-menu-dropdown {
+    display: none; /* 默认隐藏 */
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); /* 加深阴影 */
+    min-width: 120px;
+    z-index: 99999; /* JS fixed 模式下确保覆盖 */
+    overflow: hidden;
+    padding: 4px 0;
+}
+
+/* 完成后：操作列不置灰（按钮/菜单保持正常可用） */
+.task-table tr.task-completed-row td.task-actions,
+.task-table tr.task-completed-row td.task-actions * {
+    opacity: 1 !important;
+}
+
+.task-table tr.task-completed-row td.task-ops,
+.task-table tr.task-completed-row td.task-ops * {
+    opacity: 1 !important;
+}
+
+.task-table tr.task-completed-row td.task-actions .task-menu-btn {
+    color: #666;
+}
+
+.task-table tr.task-completed-row td.task-ops .task-menu-btn {
+    color: #666;
+}
+
+.task-table tr.task-completed-row td.task-actions .task-menu-item {
+    color: #333;
+}
+
+.task-table tr.task-completed-row td.task-ops .task-menu-item {
+    color: #333;
+}
+
+/* 保持 .show 以兼容 JS 逻辑（虽然主要靠 hover） */
+.task-menu-dropdown.show {
+    display: block;
+}
+
+/* JS fixed 模式 */
+.task-menu-dropdown.is-fixed {
+    position: fixed;
+    right: auto;      /* 关键：取消 right:0，避免 fixed 时被拉伸成整屏 */
+    top: auto;        /* 由 JS 设置 top */
+    bottom: auto;
+    margin-top: 0;    /* fixed 模式不需要 top:100% 的间距 */
+    width: max-content;
+    max-width: 240px;
+}
+
+.task-menu-item {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    text-align: left;
+    background: #fff; /* 确保不透明 */
+    border: none;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 400;
+}
+
+.task-menu-item:hover {
+    background: #f5f5f5;
+}
+
+.task-menu-item-danger {
+    color: #f44336;
+}
+
+.task-menu-item-danger:hover {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+
+/* --- 移动端卡片新样式 (紧凑布局) --- */
+.task-card__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+    width: 100%; /* 覆盖整张卡片，避免露出底层滑动按钮层 */
+}
+
+@media (max-width: 768px) {
+    .task-card__swipe-layer {
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+    .task-card.is-swipe-right::before { display: flex; content: '记录'; }
+    .task-card.is-swipe-left::after { display: none; }
+
+    .task-card.is-swipe-right .task-card__swipe-layer {
+        transform: translate3d(78px, 0, 0);
+    }
+    .task-card.is-swipe-left .task-card__swipe-layer {
+        transform: translate3d(-140px, 0, 0);
+    }
+
+    /* 手指拖动时的跟随（JS 写入 --swipe-x） */
+    .task-card.is-dragging .task-card__swipe-layer {
+        transform: translate3d(var(--swipe-x, 0px), 0, 0);
+        transition: none;
+    }
+}
+
+/* 左滑露出操作按钮层（仅移动端用，稳：不影响 PC） */
+.task-card__swipe-actions {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    justify-content: flex-end;
+    padding: 0;
+    z-index: 0;
+    pointer-events: none; /* 默认不吃事件，只有左滑时开启 */
+    opacity: 0;           /* 默认隐藏，避免“常驻显示” */
+    visibility: hidden;
+    transition: opacity 0.15s ease;
+}
+
+.task-card__swipe-actions--left {
+    width: 140px;
+}
+
+.swipe-action-btn {
+    width: 70px;
+    border: none;
+    background: #6b7280;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.swipe-action-btn--edit {
+    background: #4b5563;
+}
+
+.swipe-action-btn--delete {
+    background: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .task-card.is-swipe-left .task-card__swipe-actions {
+        pointer-events: auto;
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.task-card__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.task-card__header {
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.task-card__name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.2; /* 正常行高 */
+    margin: 0;
+}
+
+.task-card__category {
+    font-size: 9px;
+    color: #888;
+    background: #f0f0f0;
+    padding: 2px 5px;
+    border-radius: 99px;
+    white-space: nowrap;
+    line-height: 1.2; /* 与标题一致 */
+    font-weight: 500;
+    margin-top: 2px; /* 视觉微调：让小字在视觉上更居中于大字 */
+}
+
+.task-card__times {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.task-time-row {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.task-time-label {
+    color: #888;
+    margin-right: 8px;
+    font-weight: 400;
+    font-size: 13px;
+}
+
+.task-time-val {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.task-time-sep {
+    color: #ddd;
+    margin: 0 6px;
+}
+
+.task-card__ops {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-left: 8px;
+    min-width: 40px;
+}
+
+/* 复选框样式保持原样，位置微调 */
+.task-card__ops .task-card__check {
+    margin-top: 2px;
+}
+
+/* 菜单按钮样式微调 */
+.task-card__ops .task-menu-btn {
+    padding: 6px 10px;
+    background: rgba(0,0,0,0.04);
+    border-radius: 6px;
+    margin-bottom: 2px;
+}
+
+/* 完成态调整 */
+.task-card--completed .task-card__name {
+    color: #999;
+    text-decoration: line-through;
+    text-decoration-color: rgba(0,0,0,0.2);
+}
+.task-card--completed .task-card__category {
+    opacity: 0.6;
+}
+.task-card--completed .task-time-row {
+    color: #aaa;
+}
+.task-card--completed .task-time-label {
+    color: #ccc;
+}
+
+/* ===== 完成态（新卡片布局）审美修复：背景淡灰，但文字可读 =====
+   目标：
+   - 背景：轻度置灰（非渐变、非整卡 opacity）
+   - 文案：计划/实际保持清晰（中灰），避免“看不清”
+   - 不影响菜单/勾选等功能 */
+.task-card--completed .task-card__swipe-layer {
+    background: rgba(0, 0, 0, 0.045);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+.task-card--completed .task-card__name {
+    color: #4b5563; /* 比 #999 更清晰 */
+    text-decoration: line-through;
+    text-decoration-color: rgba(0,0,0,0.18);
+    text-decoration-thickness: 2px;
+}
+
+.task-card--completed .task-card__category {
+    opacity: 1; /* 避免整体淡化导致看不清 */
+    color: #6b7280;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.task-card--completed .task-time-row {
+    color: #6b7280;
+}
+
+.task-card--completed .task-time-label {
+    color: #9ca3af;
+}
+
+.task-card--completed .task-time-val {
+    color: #6b7280;
+    font-weight: 500;
+}

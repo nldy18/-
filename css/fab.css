@@ -1,0 +1,177 @@
+/* 顶部精简日期栏 */
+.date-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+}
+
+/* 隐藏箭头按钮 */
+.date-bar .icon-btn {
+    display: none !important;
+}
+
+.date-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--muted); /* 弱化颜色 */
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.date-title:hover {
+    background: rgba(0,0,0,0.04);
+    color: var(--text); /* 悬停加深 */
+}
+
+/* 增加日历图标伪元素，增强可点击感 */
+.date-title::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.7;
+}
+
+.date-title:hover::before {
+    opacity: 1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+}
+
+/* 浮动操作按钮 (FAB) */
+[hidden] {
+    display: none !important;
+}
+
+.fab-container {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+    z-index: 900;
+    display: flex;
+    flex-direction: column-reverse; /* 容器仍用 column-reverse：按钮在最下方，菜单向上展开 */
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.fab-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    box-shadow: 0 6px 18px rgba(23, 119, 179, 0.28);
+    font-size: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+.fab-btn:focus,
+.fab-btn:focus-visible {
+    outline: none;
+}
+
+.fab-btn:hover {
+    transform: scale(1.05);
+    background: var(--primary-600);
+}
+
+.fab-btn.is-open {
+    transform: rotate(45deg);
+    background: #666;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.fab-menu {
+    display: flex;
+    flex-direction: column; /* 让 DOM 顺序=视觉顺序，便于控制按钮排列 */
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.fab-item {
+    background: white;
+    color: #666;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: slideUpFade 0.2s forwards;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+.fab-item:focus,
+.fab-item:focus-visible {
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.fab-item:hover {
+    color: #1777b3;
+    transform: translateX(-4px);
+}
+
+.fab-item:nth-child(1) { animation-delay: 0.05s; }
+.fab-item:nth-child(2) { animation-delay: 0.1s; }
+.fab-item:nth-child(3) { animation-delay: 0.15s; }
+
+@keyframes slideUpFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .fab-container {
+        right: 20px;
+        bottom: 24px;
+    }
+    
+    .fab-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 24px;
+        font-size: 24px;
+    }
+
+    .date-title {
+        font-size: 15px;
+        padding: 4px 8px;
+    }
+    
+    /* 移动端也不显示箭头 */
+    .date-bar .icon-btn {
+        display: none !important;
+    }
+}

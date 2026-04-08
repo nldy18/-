@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间记录 - 时间清单</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/fab.css">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#f5f5f5">
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/maskable.svg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <style>
+        .summary-header-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .summary-tab {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .summary-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .stats-card {
+            background: white;
+            border-radius: var(--r-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: var(--r-md);
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: var(--muted);
+        }
+        .daily-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .daily-item {
+            background: white;
+            padding: 16px;
+            border-radius: var(--r-md);
+            box-shadow: var(--shadow-sm);
+        }
+        .daily-date {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 15px;
+        }
+        .daily-summary {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+        .date-range-display {
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            margin: 12px 0;
+        }
+    </style>
+</head>
+<body class="page-summary">
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <a href="index.html" class="btn-back">← 返回任务</a>
+                <h1 class="app-title">时间记录</h1>
+            </div>
+            <div class="summary-header-controls">
+                <button class="summary-tab active" data-range="week">周</button>
+                <button class="summary-tab" data-range="month">月</button>
+                <button class="summary-tab" data-range="year">年</button>
+            </div>
+        </header>
+        
+        <main>
+            <div class="date-range-display" id="dateRangeDisplay"></div>
+
+            <div class="stats-card">
+                <h3 style="font-size: 16px; font-weight: 600;">概览</h3>
+                <div style="display: flex; justify-content: center; margin: 8px 0 0;">
+                    <!-- 留白给“外侧标注 + 折线引导” -->
+                    <!-- 关键：不写 width/height 属性，交给 JS 按实际尺寸 + DPR 做高清渲染，避免缩放发糊 -->
+                    <canvas id="pieChart" style="width: min(560px, 100%); aspect-ratio: 360/320; height: auto; display:block;"></canvas>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0;">趋势</h3>
+                    <!-- 图例/筛选器 -->
+                    <div id="chartLegend" class="chart-legend" aria-label="趋势分类筛选">
+                        <!-- JS 动态生成 -->
+                    </div>
+                </div>
+                <!-- 关键：不写 width/height 属性，交给 JS 按实际尺寸 + DPR 做高清渲染，避免缩放发糊 -->
+                <canvas id="lineChart" style="width: 100%; aspect-ratio: 2 / 1; height: auto; display:block;"></canvas>
+            </div>
+
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; padding-left: 4px;">每日</h3>
+            <div id="dailyList" class="daily-list">
+                <!-- 每日数据将插入这里 -->
+            </div>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/charts.js?v=1765685089"></script>
+    <script src="js/summary.js?v=1765685089"></script>
+    <script src="js/pwa.js?t=1765685089"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1777b3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d5a8a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 时钟圆圈 -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="url(#grad1)" stroke-width="8"/>
+  
+  <!-- 时针 -->
+  <line x1="100" y1="100" x2="100" y2="50" stroke="url(#grad1)" stroke-width="10" stroke-linecap="round"/>
+  
+  <!-- 分针变成对勾 -->
+  <path d="M 100 100 L 130 100 L 160 60" fill="none" stroke="url(#grad1)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- 中心点 -->
+  <circle cx="100" cy="100" r="12" fill="url(#grad1)"/>
+</svg>
